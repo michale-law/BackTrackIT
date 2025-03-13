@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, Float, ForeignKey
 from sqlalchemy.orm import relationship, declarative_base
 
+
 Base = declarative_base()
 
 class User(Base):  # Define User model
@@ -21,8 +22,22 @@ class InventoryItem(Base):
     quantity = Column(Integer, default=0)
     price = Column(Float)
 
+
+    # Establish relationship with the User model
+    user = relationship("User", back_populates="inventory")
+
+    class User(Base):
+        __tablename__ = "users"
+
+        id = Column(Integer, primary_key=True, index=True)
+        username = Column(String, unique=True, nullable=False)
+
+        # Define relationship to inventory items (one-to-many)
+        inventory = relationship("InventoryItem", back_populates="user")
+
     user_id = Column(Integer, ForeignKey("users.id"))  # Links each item to a user
     owner = relationship("User", back_populates="inventory_items")  # Fix relationship reference
+
 
 
     def __repr__(self):
