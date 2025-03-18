@@ -1,7 +1,11 @@
+# app/database/schemas.py
+
 from pydantic import BaseModel
 from typing import Optional
 
-# User Schema
+# ------------------------------------------------
+# USER SCHEMAS
+# ------------------------------------------------
 class UserBase(BaseModel):
     username: str
 
@@ -12,9 +16,11 @@ class UserResponse(UserBase):
     id: int
 
     class Config:
-        from_attributes = True  # Enables ORM mode
+        from_attributes = True  # Enables ORM mode (attribute access)
 
-# Inventory Schema
+# ------------------------------------------------
+# INVENTORY PRODUCT STATUS SCHEMAS
+# ------------------------------------------------
 class InventoryProductStatusBase(BaseModel):
     name: Optional[str] = None
     broken: Optional[int] = None
@@ -22,11 +28,33 @@ class InventoryProductStatusBase(BaseModel):
     used: Optional[int] = None
 
 class InventoryProductStatusCreate(InventoryProductStatusBase):
-    pass  # Used for creation
+    pass
 
 class InventoryProductStatusResponse(InventoryProductStatusBase):
     id: int
     owner_id: int
 
     class Config:
-        from_attributes = True  # Enables ORM mode
+        from_attributes = True
+
+# ------------------------------------------------
+# INVENTORY ITEM SCHEMAS
+# ------------------------------------------------
+class InventoryItemBase(BaseModel):
+    """Fields shared by create and update."""
+    name: str
+    description: Optional[str] = None
+    quantity: int
+    price: float
+
+class InventoryItemCreate(InventoryItemBase):
+    """Fields required to create a new InventoryItem."""
+    pass
+
+class InventoryItemSchema(InventoryItemBase):
+    """Fields returned to the client when reading an InventoryItem."""
+    id: int
+    user_id: int  # or 'owner_id' if your model column is named that way
+
+    class Config:
+        from_attributes = True  # so Pydantic can read ORM model attributes

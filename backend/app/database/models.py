@@ -9,7 +9,8 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(100), unique=True, nullable=False)
-    password = Column(String(255), nullable=False)
+    Hashed_password = Column(String(255), nullable=False)
+    email = Column(String(100), unique=True, index =True)
 
     # Relationship: a user can have many inventory items
     inventory_items = relationship("InventoryItem", back_populates="owner")

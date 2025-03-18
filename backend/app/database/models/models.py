@@ -1,6 +1,8 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
-from .db import Base
+from sqlalchemy.ext.declarative import  declarative_base
+
+Base = declarative_base()
 
 class User(Base):
     __tablename__ = "users"
@@ -17,6 +19,9 @@ class InventoryProductStatus(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=True)
+    description= Column(String,index=True)
+    quantity =Column(Integer)
+    price = Column(Float)
     broken = Column(Integer, nullable=True, default=0)
     new = Column(Integer, nullable=True, default=0)
     used = Column(Integer, nullable=True, default=0)

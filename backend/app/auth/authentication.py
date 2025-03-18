@@ -17,56 +17,24 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # OAuth2 scheme instance; tokenUrl should match your login endpoint (e.g., "/token")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """
-    Verify a plain password against its hashed version.
-    """
-    return pwd_context.verify(plain_password, hashed_password)
-
-
-def get_password_hash(password: str) -> str:
-    """
-    Return a hashed version of the given password.
-    """
-    return pwd_context.hash(password)
-
-
-def create_access_token(data: dict, expires_delta: timedelta = None) -> str:
-    """
-    Create a JWT access token with an expiration time.
-    """
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
-
-
-def verify_token(token: str) -> dict:
-    """
-    Verify the JWT token and return its payload if valid.
-    """
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
-            raise credentials_exception
-        return payload
-    except JWTError:
-        raise credentials_exception
-
-
+from auth.utils import (
+    hashed_password, verify_password,create_access_token,verify_token
+)
 def get_current_user(token: str = Depends(oauth2_scheme)):
-    """
-    Retrieve the current user based on the JWT token provided.
-    """
-    return verify_token(token)
+    payload = verify_token(token)
+    if payload is None:
+        raise HTTPException(
+            staus_code= status.HTTP_401_UNAUTHORIZED,)
+            detail="Invalid token"
+            headers={"WWW-Authenticate:","Beaer"}
+        )
+    return Payload
+def Login_user(username:str,password:str,db_user)-> Optional[str]:
+    if not db_user or not verify_password(password,db_user.hashed_password):
+        return None
+    access_token_expires=timedelta(minutes=30)
+    token_data = {"sub":db_user.username}
+    return create_access_token(
+        data=token_data,
+        expires_delta=access_token_expires
+    )
